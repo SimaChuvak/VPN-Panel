@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+:root { color: #e7edf7; background: #0b1020; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button { border: 0; border-radius: 10px; background: #5b73ff; color: white; cursor: pointer; font: inherit; font-weight: 650; padding: 12px 16px; }
+button:disabled { cursor: wait; opacity: .65; }
+.login-shell { align-items: center; background: radial-gradient(circle at 20% 20%, #202e62, #0b1020 55%); display: flex; min-height: 100vh; justify-content: center; padding: 24px; }
+.login-card { background: #121a2f; border: 1px solid #253252; border-radius: 18px; display: grid; gap: 16px; max-width: 420px; padding: 36px; width: 100%; }
+h1, h2, p { margin: 0; } h1 { font-size: clamp(1.65rem, 4vw, 2.25rem); } .eyebrow { color: #8ea0ff; font-size: .75rem; font-weight: 800; letter-spacing: .12em; }
+label { color: #bdc9dc; display: grid; font-size: .9rem; gap: 7px; } input { background: #0d1426; border: 1px solid #334265; border-radius: 9px; color: white; font: inherit; padding: 11px; } input:focus { border-color: #8497ff; outline: 2px solid #8497ff55; }
+.form-error { color: #ffabb7; font-size: .9rem; }.dashboard-shell { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }.dashboard-shell aside { background: #0e1528; border-right: 1px solid #23304c; display: flex; flex-direction: column; gap: 28px; padding: 24px 16px; }.brand { font-size: 1.1rem; font-weight: 800; padding: 8px; } nav { display: grid; gap: 6px; } nav a { border-radius: 8px; color: #aab7cc; padding: 10px; } nav .active { background: #26355d; color: white; }.secondary { background: transparent; border: 1px solid #3a4969; margin-top: auto; }.dashboard { display: grid; align-content: start; gap: 28px; padding: 48px; }.dashboard header { align-items: center; display: flex; justify-content: space-between; gap: 16px; }.role { background: #1b3152; border-radius: 999px; color: #9bd0ff; padding: 6px 10px; }.metric-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }.metric-grid article, .empty-state { background: #121a2f; border: 1px solid #253252; border-radius: 14px; display: grid; gap: 10px; padding: 22px; }.metric-grid span, small { color: #9baac0; }.metric-grid strong { color: #92a2ff; font-size: 1.6rem; }.empty-state { max-width: 700px; }
+@media (max-width: 720px) { .dashboard-shell { grid-template-columns: 1fr; }.dashboard-shell aside { border-bottom: 1px solid #23304c; border-right: 0; }.dashboard-shell nav { grid-template-columns: repeat(3, 1fr); }.secondary { margin-top: 0; }.dashboard { padding: 24px; }.metric-grid { grid-template-columns: 1fr; } }
