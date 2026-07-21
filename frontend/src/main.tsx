@@ -43,11 +43,58 @@ function Login({ onAuthenticated }: { onAuthenticated: (token: string) => void }
 
 function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
   const [health, setHealth] = useState("Проверяем");
+  const [resources, setResources] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("overview");
+
   useEffect(() => { request<{ status: string }>("/health").then(() => setHealth("Работает")).catch(() => setHealth("Недоступен")); }, []);
-  return <main className="dashboard-shell"><aside><div className="brand">VPN Panel</div><nav><a className="active">Обзор</a><a>Серверы</a><a>Клиенты</a><a>Мониторинг</a><a>Аудит</a></nav><button className="secondary" onClick={onLogout}>Выйти</button></aside>
+
+  useEffect(() => {
+    if (activeTab === "monitoring") {
+      request<any>("/vpn/monitoring/resources").then(setResources).catch(() => setResources(null));
+      const interval = setInterval(() => {
+        request<any>("/vpn/monitoring/resources").then(setResources).catch(() => {});
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+  };
+
+  const formatUptime = (seconds: number) => {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${days}д ${hours}ч ${minutes}м`;
+  };
+
+  return <main className="dashboard-shell"><aside><div className="brand">VPN Panel</div><nav>
+    <a className={activeTab === "overview" ? "active" : ""} onClick={() => setActiveTab("overview")}>Обзор</a>
+    <a className={activeTab === "monitoring" ? "active" : ""} onClick={() => setActiveTab("monitoring")}>Мониторинг</a>
+    <a>Серверы</a><a>Клиенты</a><a>Аудит</a>
+  </nav><button className="secondary" onClick={onLogout}>Выйти</button></aside>
     <section className="dashboard"><header><div><span className="eyebrow">ПАНЕЛЬ УПРАВЛЕНИЯ</span><h1>Здравствуйте, {user.username}</h1></div><span className="role">{user.role}</span></header>
-      <div className="metric-grid"><article><span>API</span><strong>{health}</strong><small>Backend и база данных</small></article><article><span>VPN-серверы</span><strong>0</strong><small>Добавьте первый сервер</small></article><article><span>Клиенты</span><strong>0</strong><small>Нет активных подключений</small></article></div>
-      <article className="empty-state"><h2>Инфраструктура готова к настройке</h2><p>Подключите HostAgent и добавьте первый VPN-сервер, чтобы начать управление клиентами.</p><button>Добавить сервер</button></article>
+      {activeTab === "overview" && <>
+        <div className="metric-grid"><article><span>API</span><strong>{health}</strong><small>Backend и база данных</small></article><article><span>VPN-серверы</span><strong>0</strong><small>Добавьте первый сервер</small></article><article><span>Клиенты</span><strong>0</strong><small>Нет активных подключений</small></article></div>
+        <article className="empty-state"><h2>Инфраструктура готова к настройке</h2><p>Подключите HostAgent и добавьте первый VPN-сервер, чтобы начать управление клиентами.</p><button>Добавить сервер</button></article>
+      </>}
+      {activeTab === "monitoring" && <>
+        {resources ? <>
+          <div className="metric-grid">
+            <article><span>CPU</span><strong>{resources.cpu}%</strong><small>Загрузка процессора</small></article>
+            <article><span>RAM</span><strong>{resources.memory.percent}%</strong><small>{formatBytes(resources.memory.used)} / {formatBytes(resources.memory.total)}</small></article>
+            <article><span>Disk</span><strong>{resources.disk.percent}%</strong><small>{formatBytes(resources.disk.used)} / {formatBytes(resources.disk.total)}</small></article>
+            <article><span>Uptime</span><strong>{formatUptime(resources.uptime)}</strong><small>Время работы</small></article>
+            <article><span>Load Avg</span><strong>{resources.loadavg.map((l: number) => l.toFixed(2)).join(", ")}</strong><small>Средняя нагрузка</small></article>
+            <article><span>Swap</span><strong>{resources.swap.percent}%</strong><small>{formatBytes(resources.swap.used)} / {formatBytes(resources.swap.total)}</small></article>
+          </div>
+        </> : <article className="empty-state"><h2>HostAgent недоступен</h2><p>Не удалось получить метрики сервера. Проверьте подключение к HostAgent.</p></article>}
+      </>}
     </section></main>;
 }
 
